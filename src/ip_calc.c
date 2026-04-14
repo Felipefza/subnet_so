@@ -10,69 +10,28 @@
 #include "../include/string_view.h"
 #include "../include/user_input.h"
 
-int calcFistIP (Octetcs* pOctectNet , char* fistIP) {
+
+int subIP (Octetcs* pOctectBroad, char* outIP, int subNumber) {
   char* buffer = calloc(15, sizeof(buffer));
   int sum;
   int i = 3;
   bool isRunning = true;
 
   while (i > -1 && isRunning) {
-    sum = atoi(pOctectNet->items[i].data) + 1;
-    if (sum > 255) {
-      if (i == 0 ) {
-        printf("IP RANGO MAXIMO");
-        return EXIT_FAILURE;
-      };
-      if (i == 3) {
-        sprintf(buffer, "%s", "0");
-      } else {
-        sprintf(buffer, "%s.", "0");
-      }
-      strcat(buffer, fistIP);
-      sprintf(fistIP, "%s", buffer);
-      i--;
-    } else {
-      if (i == 3) {
-        sprintf(buffer, "%d", sum);
-      } else {
-        sprintf(buffer, "%d.", sum);
-      }
-      strcat(buffer, fistIP);
-      sprintf(fistIP, "%s", buffer);
-      sprintf(buffer, "%s", "");
-      i--;
-      isRunning = false;
-    }
-  }
-  while (i > -1) {
-    sprintf(buffer,  "%.*s.",(int)pOctectNet->items[i].count, pOctectNet->items[i].data);
-    strcat(buffer, fistIP);
-    sprintf(fistIP, "%s", buffer);
-    i--;
-  }
-  return EXIT_SUCCESS;
-}
-
-int calcLastIP (Octetcs* pOctectBroad, char* lastIP) {
-  char* buffer = calloc(15, sizeof(buffer));
-  int sum;
-  int i = 3;
-  bool isRunning = true;
-
-  while (i > -1 && isRunning) {
-    sum = atoi(pOctectBroad->items[i].data) - 1;
+    sum = atoi(pOctectBroad->items[i].data) - subNumber;
     if (sum < 0) {
       if (i == 0 ) {
-        printf("IP RANGO MAXIMO");
+        printf("IP RANGO MINIMO");
         return EXIT_FAILURE;
       };
+
       if (i == 3) {
         sprintf(buffer, "%s", "255");
       } else {
         sprintf(buffer, "%s.", "255");
       }
-      strcat(buffer, lastIP);
-      sprintf(lastIP, "%s", buffer);
+      strcat(buffer, outIP);
+      sprintf(outIP, "%s", buffer);
       i--;
     } else {
       if (i == 3) {
@@ -80,8 +39,8 @@ int calcLastIP (Octetcs* pOctectBroad, char* lastIP) {
       } else {
         sprintf(buffer, "%d.", sum);
       }
-      strcat(buffer, lastIP);
-      sprintf(lastIP, "%s", buffer);
+      strcat(buffer, outIP);
+      sprintf(outIP, "%s", buffer);
       sprintf(buffer, "%s", "");
       i--;
       isRunning = false;
@@ -89,30 +48,28 @@ int calcLastIP (Octetcs* pOctectBroad, char* lastIP) {
   }
   while (i > -1) {
     sprintf(buffer,  "%.*s.",(int)pOctectBroad->items[i].count, pOctectBroad->items[i].data);
-    strcat(buffer, lastIP);
-    sprintf(lastIP, "%s", buffer);
+    strcat(buffer, outIP);
+    sprintf(outIP, "%s", buffer);
     i--;
   }
   return EXIT_SUCCESS;
 }
 
-
-
 void calcType (Octetcs* pOctectArray, char* ipType)
 {
   int fistOctect = atoi(pOctectArray->items[0].data);
   if (fistOctect == 10) {
-    sprintf(ipType, "%s", "PRIVATE TYPE A");
+    sprintf(ipType, "%s", "PRIVATO TIPO A");
   }
   else if (fistOctect ==  172) {
-    sprintf(ipType, "%s", "PRIVATE TYPE B");
+    sprintf(ipType, "%s", "PRIVATO TIPO B");
 
   } 
   else if (fistOctect == 192) {
-    sprintf(ipType, "%s", "PRIVATE TYPE C");
+    sprintf(ipType, "%s", "PRIVATO TIPO C");
   }
   else {
-    sprintf(ipType,"%s", "PUBLIC");
+    sprintf(ipType,"%s", "PUBLICO");
   }
 }
 
@@ -148,10 +105,10 @@ void calcNetAdrrs (Octetcs* pOctectArray, char* netAddrs)
   strncat(netAddrs, buffer, 5);
 }
 
-void calcBroadcast (Octetcs* pOctectNet, int* numberHosts, char* broadcast)
+void addIP (Octetcs* pOctectNet, int numberHosts, char* broadcast)
 {
   bool isRunning = true;
-  int hosts = *numberHosts - 1;
+  int hosts = numberHosts - 1;
   int i = 3;
   char* buffer = calloc(15, sizeof(char));
   int sum = hosts += atoi(pOctectNet->items[i].data);
@@ -229,3 +186,4 @@ void calcMasc(int* NumberHosts, int* masc, char* mascPunteada)
     i++;
   }
 }
+

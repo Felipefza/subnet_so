@@ -15,11 +15,11 @@ typedef struct {
 } ResultIP;
 
 void calcNetAdrrs (Octetcs* pOctectArray, char* netAddrs);
-void calcBroadcast (Octetcs* netAddrs, int* numberHosts, char* broadcast);
+void addIP (Octetcs* netAddrs, int numberHosts, char* broadcast);
 void calcMasc(int* NumberHosts, int* masc, char* mascPunteada);
 void calcType (Octetcs* pOctectArray, char* ipType);
-int calcFistIP (Octetcs* pOctectNet , char* fistIP);
-int calcLastIP (Octetcs* pOctectBroad, char* lastIP);
+int subIP (Octetcs* pOctectBroad, char* lastIP, int addNumber);
+void printResults (ResultIP* results, int* pNumberAreas);
 
 #endif // !IP_CALC_H
 
