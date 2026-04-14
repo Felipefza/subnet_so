@@ -11,7 +11,7 @@ void askUserInput(void* pVar, char* pMessage, char* format)
     printf("MEMORY ALLOCATION FAILED");
   }
 
-  printf("\n%s", pMessage);
+  printf("%s", pMessage);
   printf("\n-> :");
   scanf(format, pVar);
 }

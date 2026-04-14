@@ -5,10 +5,13 @@
 
 typedef struct {
   char* net;
-  int* masc;
+  int masc;
+  char* mascPunteada;
   char* broadcast;
   char* fistIP;
   char* lastIP;
+  int numberHosts;
+  char* ipType;
 } ResultIP;
 
 void calcNetAdrrs (Octetcs* pOctectArray, char* netAddrs);

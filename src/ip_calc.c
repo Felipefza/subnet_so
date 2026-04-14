@@ -101,19 +101,18 @@ int calcLastIP (Octetcs* pOctectBroad, char* lastIP) {
 void calcType (Octetcs* pOctectArray, char* ipType)
 {
   int fistOctect = atoi(pOctectArray->items[0].data);
-  switch (fistOctect) {
-    case 10: {
-      strcat(ipType, "PRIVATE TYPE A");
-    }
-    case 172: {
-      strcat(ipType, "PRIVATE TYPE B");
-    }
-    case 192: {
-      strcat(ipType, "PRIVATE TYPE C");
-    }
-    default: {
-      strcat(ipType, "PUBLIC");
-    }
+  if (fistOctect == 10) {
+    sprintf(ipType, "%s", "PRIVATE TYPE A");
+  }
+  else if (fistOctect ==  172) {
+    sprintf(ipType, "%s", "PRIVATE TYPE B");
+
+  } 
+  else if (fistOctect == 192) {
+    sprintf(ipType, "%s", "PRIVATE TYPE C");
+  }
+  else {
+    sprintf(ipType,"%s", "PUBLIC");
   }
 }
 
