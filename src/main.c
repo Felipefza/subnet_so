@@ -42,6 +42,9 @@ int main(int argc, char *argv[])
 
     char* ipType = calloc(15, sizeof(ipType));
 
+    char* fistIP = calloc(15, sizeof(fistIP));
+    char* lastIP = calloc(15, sizeof(lastIP));
+
     askUserInput(numberHosts, "INGRESE CANTIDAD DE HOSTS (SUMANDO RED Y BROADCAST) (MAX 5 DIGITS)", "%5d");
 
     calcNetAdrrs(&pOctectUser, netAddrs);
@@ -55,10 +58,22 @@ int main(int argc, char *argv[])
     calcType(&pOctectUser, ipType);
     calcBroadcast(&pOctectNet, numberHosts, broadcast);
 
+    String_View sv_broad_ip = sv(broadcast);
+    Octetcs pOctectbroad = {0};
+
+    arrayInput(&sv_broad_ip, &pOctectbroad);
+
+    calcFistIP(&pOctectNet, fistIP);
+    calcLastIP(&pOctectbroad, lastIP);
+
+    // ResultIP resultado = {netAddrs, masc, broadcast, fistIP, lastIP};
+
 
     printf("RED:                           %s / %d\t\n", netAddrs, *masc);
     printf("MASCARA PUNTEADA:              %s\n", mascPunteada);
     printf("BROADCAST:                     %s \n", broadcast);
+    printf("PRIMERA IP UTILIZABLE:         %s \n", fistIP);
+    printf("ULTIMA IP UTILIZABLE:          %s \n", lastIP);
     printf("CANTIDAD DE HOSTS TOTALES:     %d \n", *numberHosts);
     printf("CANTIDAD DE HOSTS UTILIZABLES: %d \n", *numberHosts - 2);
     printf("TIPO DE IP:                    %s \n", ipType);

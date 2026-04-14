@@ -1,19 +1,22 @@
 #ifndef IP_CALC_H
 #define IP_CALC_H
 
-typedef struct {
-  const char* net;
-  const char* masc;
-  const char* broadcast;
-  const char* fistIP;
-  const char* lastIP;
-} ResultIP;
+#include "user_input.h"
 
+typedef struct {
+  char* net;
+  int* masc;
+  char* broadcast;
+  char* fistIP;
+  char* lastIP;
+} ResultIP;
 
 void calcNetAdrrs (Octetcs* pOctectArray, char* netAddrs);
 void calcBroadcast (Octetcs* netAddrs, int* numberHosts, char* broadcast);
 void calcMasc(int* NumberHosts, int* masc, char* mascPunteada);
 void calcType (Octetcs* pOctectArray, char* ipType);
+int calcFistIP (Octetcs* pOctectNet , char* fistIP);
+int calcLastIP (Octetcs* pOctectBroad, char* lastIP);
 
 #endif // !IP_CALC_H
 
