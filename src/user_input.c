@@ -32,6 +32,4 @@ void arrayInput(String_View* sv_user_ip, Octetcs* pOctectArray)
       return;
     }
   }
-
-  printf("FORMATO CORRECTO\n");
 }

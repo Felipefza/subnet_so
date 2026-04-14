@@ -6,21 +6,12 @@
 // LOCAL FILES
 #include "../include/string_view.h"
 #include "../include/user_input.h"
+#include "../include/ip_calc.h"
 
 // ncurses LIBRARIES
 #include <ncurses.h>
 #include <panel.h>
-#include <string.h>
 
-struct ResultIP {
-  const char* net;
-  const char* masc;
-  const char* broadcast;
-  const char* fistIP;
-  const char* lastIP;
-};
-
-struct ResultIP calcSubnet(Octetcs* pOctectArray, int* pNumberhosts);
 
 int main(int argc, char *argv[])
 {
@@ -31,45 +22,46 @@ int main(int argc, char *argv[])
 
   String_View sv_user_ip = sv(pUserIP);
 
-  Octetcs pOctectArray = {0};
+  Octetcs pOctectUser = {0};
 
-  arrayInput(&sv_user_ip, &pOctectArray);
-
-  for (int i = 0; i < pOctectArray.count; i++) printf("%.*s\n", (int)pOctectArray.items[i].count, pOctectArray.items[i].data);
-
-  // Areas pNumberHosts = {0};
+  arrayInput(&sv_user_ip, &pOctectUser);
 
   int pNumberAreas;
 
   askUserInput(&pNumberAreas, "INGRESE CANTIDAD DE AREAS (MAX 2 DIGITS)", "%2d");
 
-  printf("%d\n", pNumberAreas);
-
-  int* pNumberHosts = calloc(1, sizeof(*pNumberHosts));
-
   for (int i = 0; i < pNumberAreas; i++)
   {
-    askUserInput(pNumberHosts, "INGRESE CANTIDAD DE HOSTS (MAX 5 DIGITS)", "%5d");
+    int* numberHosts = calloc(5, sizeof(numberHosts));
 
-    calcSubnet(&pOctectArray, pNumberHosts);
+    int* masc = calloc(2, sizeof(masc));
+    char* mascPunteada = calloc(34, sizeof(mascPunteada));
+
+    char* netAddrs = calloc(15, sizeof(netAddrs));
+    char* broadcast = calloc(15, sizeof(broadcast));
+
+    char* ipType = calloc(15, sizeof(ipType));
+
+    askUserInput(numberHosts, "INGRESE CANTIDAD DE HOSTS (SUMANDO RED Y BROADCAST) (MAX 5 DIGITS)", "%5d");
+
+    calcNetAdrrs(&pOctectUser, netAddrs);
+
+    String_View sv_net_ip = sv(netAddrs);
+    Octetcs pOctectNet = {0};
+
+    arrayInput(&sv_net_ip, &pOctectNet);
+
+    calcMasc(numberHosts, masc, mascPunteada);
+    calcType(&pOctectUser, ipType);
+    calcBroadcast(&pOctectNet, numberHosts, broadcast);
+
+
+    printf("RED:                           %s / %d\t\n", netAddrs, *masc);
+    printf("MASCARA PUNTEADA:              %s\n", mascPunteada);
+    printf("BROADCAST:                     %s \n", broadcast);
+    printf("CANTIDAD DE HOSTS TOTALES:     %d \n", *numberHosts);
+    printf("CANTIDAD DE HOSTS UTILIZABLES: %d \n", *numberHosts - 2);
+    printf("TIPO DE IP:                    %s \n", ipType);
   }
-
-
-
   return EXIT_SUCCESS;
-}
-
-struct ResultIP calcSubnet(Octetcs* pOctectArray, int* pNumberhosts)
-{
-  for (int i = 3; i > -1; i--) {
-    char* tmpString = calloc(4, sizeof(char));
-
-    if (!strncmp(pOctectArray->items[i].data, "255", 3)) {
-      tmpString = ".0";
-      printf("%s\n", pOctectArray->items[i].data);
-      printf("%s\n", tmpString);
-    }
-
-    strcat(tmpString, const char *)
-  }
 }
