@@ -59,14 +59,14 @@ int main(int argc, char *argv[])
 
     calcMasc(numberHosts, masc, mascPunteada);
 
-    addIP(&pOctectNet, *numberHosts - 1, broadcast);
+    addIP(&pOctectNet, *numberHosts, broadcast);
 
     String_View sv_broad_ip = sv(broadcast);
 
     arrayInput(&sv_broad_ip, &pOctectbroad);
 
     addIP(&pOctectNet, 1, fistIP);
-    subIP(&pOctectbroad, lastIP, 1);
+    subIP(&pOctectbroad, lastIP, 2);
 
     ResultIP resultadoIP = {
       strdup(netAddrs), 

@@ -106,9 +106,16 @@ void calcMasc(int* NumberHosts, int* masc, char* mascPunteada)
 void addIP (Octetcs* pOctectNet, int numberHosts, char* broadcast)
 {
   bool isRunning = true;
-  int hosts = numberHosts;
+  int hosts = 0; 
   int i = 3;
+  int j = 0;
   char* buffer = calloc(15, sizeof(char));
+
+  while (hosts < numberHosts) {
+    hosts = pow(2, j);
+    j++;
+  }
+
   int sum = hosts += atoi(pOctectNet->items[i].data);
 
   while (isRunning && i > -1) {
