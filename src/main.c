@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 // LOCAL FILES
 #include "../include/string_view.h"
@@ -18,7 +19,7 @@ int main(int argc, char *argv[])
 {
   char* pUserIP = calloc(15, sizeof(char));
   char* pMessage = "INGRESE LA IP EJ: '192.168.1.1', SEPARADO POR UN PUNTO (.)";
-  
+
   askUserInput(pUserIP, pMessage, "%15s");
 
   String_View sv_user_ip = sv(pUserIP);
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
     Octetcs pOctectbroad = {0};
 
     printf("\nAREA NUMERO %d\n", i + 1);
-    askUserInput(numberHosts, "INGRESE CANTIDAD DE HOSTS (SUMANDO RED Y BROADCAST)", "%5d");
+    askUserInput(numberHosts, "INGRESE CANTIDAD DE HOSTS UTILIZABLES", "%5d");
 
     String_View sv_net_ip = sv(netAddrs);
 
@@ -59,14 +60,23 @@ int main(int argc, char *argv[])
 
     calcMasc(numberHosts, masc, mascPunteada);
 
-    addIP(&pOctectNet, *numberHosts, broadcast);
+    *numberHosts += 2;
+
+    int hosts = 0;
+    int j = 0;
+    while (hosts < *numberHosts) {
+      hosts = pow(2, j);
+      j++;
+    }
+
+    addIP(&pOctectNet, hosts - 1, broadcast);
 
     String_View sv_broad_ip = sv(broadcast);
 
     arrayInput(&sv_broad_ip, &pOctectbroad);
 
     addIP(&pOctectNet, 1, fistIP);
-    subIP(&pOctectbroad, lastIP, 2);
+    subIP(&pOctectbroad, lastIP, 1);
 
     ResultIP resultadoIP = {
       strdup(netAddrs), 
@@ -97,3 +107,5 @@ int main(int argc, char *argv[])
 
   return EXIT_SUCCESS;
 }
+
+

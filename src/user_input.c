@@ -19,24 +19,6 @@ void askUserInput(void* pVar, char* pMessage, char* format)
   scanf(format, pVar);
 }
 
-void arrayInput(String_View* sv_user_ip, Octetcs* pOctectArray)
-{
-  for (int i = 0; i < 4; i++) {
-    if (pOctectArray->count >= pOctectArray->capacity) {
-      if (pOctectArray->capacity == 0) pOctectArray->capacity = 256;
-      else pOctectArray->capacity *= 2;
-      pOctectArray->items = realloc(pOctectArray->items, pOctectArray->capacity * sizeof(*pOctectArray->items));
-    }
-
-    pOctectArray->items[pOctectArray->count++] = chop_by_delim(sv_user_ip, '.');
-
-    if (pOctectArray->items[i].count == 0 || pOctectArray->items[i].count > 3) {
-      printf("FORMATO INCORRECTO\n");
-      return;
-    }
-  }
-}
-
 void printResults (ResultIP* results, int* pNumberAreas) {
   for (int i = 0; i < *pNumberAreas; i++) {
 
