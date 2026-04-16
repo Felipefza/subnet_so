@@ -1,6 +1,6 @@
 # Variables
 CC = gcc
-CFLAGS = -Wall -Iinclude -MMD -O2 -lm
+CFLAGS = -Wall -Iinclude -MMD -O2 -lm -lncurses -lpanel -lmenu
 OBJDIR = build
 SRCDIR = src
 TARGET = $(OBJDIR)/program

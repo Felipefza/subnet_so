@@ -78,7 +78,7 @@ void calcNetAdrrs (Octetcs* pOctectArray, char* netAddrs)
   strncat(netAddrs, buffer, 5);
 }
 
-void calcMasc(int* NumberHosts, int* masc, char* mascPunteada)
+void calcMasc(int* numberHosts, int* masc, char* mascPunteada)
 {
   int i = 0;
   int hosts;
@@ -89,7 +89,7 @@ void calcMasc(int* NumberHosts, int* masc, char* mascPunteada)
 
     hosts = pow(2, i);
 
-    if (hosts > *NumberHosts) {
+    if (hosts > *numberHosts) {
       *masc = 32 - i;
 
       int k = 1;
@@ -118,6 +118,8 @@ void calcMasc(int* NumberHosts, int* masc, char* mascPunteada)
 
     i++;
   }
+
+  *numberHosts = hosts;
 }
 
 
