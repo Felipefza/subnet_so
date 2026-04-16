@@ -14,10 +14,10 @@ void calcALL (WINDOW* mainWindow, ResultIP* results, char* pUserIP, int* pNumber
 int main(void) {
   initscr();
   cbreak();
+  raw();
   keypad(stdscr, TRUE);
   curs_set(1);
 
-  /* smaller so it works on small terminals */
   WINDOW* mainWindow = newwin(LINES, COLS, 0, 0);
   box(mainWindow, 0, 0);
 
@@ -80,17 +80,24 @@ int main(void) {
         break;
       case KEY_DOWN:
         if (highlight < numberAreas - 1) highlight++;
+        break;
       case 'k':
         if (highlight > 0) highlight--;
         break;
       case 'j':
         if (highlight < numberAreas - 1) highlight++;
+        break;
+      case 'q':
+        isRunning = false;
+        break;
       default:
         break;
     }
     information = highlight;
   }
 
+  werase(mainWindow);
+  wrefresh(mainWindow);
   delwin(mainWindow);
   endwin();
   return EXIT_SUCCESS;
@@ -233,5 +240,3 @@ void calcALL (WINDOW* mainWindow, ResultIP* results, char* pUserIP, int* pNumber
     pOctectUser = pOctectNewNet;
   }
 }
-
-
