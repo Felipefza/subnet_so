@@ -39,19 +39,19 @@ int main(int argc, char *argv[])
 
   for (int i = 0; i < pNumberAreas; i++)
   {
-    int* numberHosts = calloc(5, sizeof(numberHosts));
+    int* numberHosts = calloc(20, sizeof(numberHosts));
     char* broadcast = calloc(15, sizeof(broadcast));
     int* masc = calloc(2, sizeof(masc));
-    char* mascPunteada = calloc(34, sizeof(mascPunteada));
+    char* mascPunteada = calloc(35, sizeof(mascPunteada));
 
-    char* fistIP = calloc(15, sizeof(fistIP));
-    char* lastIP = calloc(15, sizeof(lastIP));
+    char* fistIP = calloc(20, sizeof(fistIP));
+    char* lastIP = calloc(20, sizeof(lastIP));
 
     Octetcs pOctectNet = {0};
     Octetcs pOctectbroad = {0};
 
     printf("\nAREA NUMERO %d\n", i + 1);
-    askUserInput(numberHosts, "INGRESE CANTIDAD DE HOSTS (SUMANDO RED Y BROADCAST) (MAX 5 DIGITS)", "%5d");
+    askUserInput(numberHosts, "INGRESE CANTIDAD DE HOSTS (SUMANDO RED Y BROADCAST)", "%5d");
 
     String_View sv_net_ip = sv(netAddrs);
 
