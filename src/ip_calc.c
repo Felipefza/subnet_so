@@ -6,11 +6,9 @@
 #include <string.h>
 
 // LOCAL FILES
-#include "../include/string_view.h"
 #include "../include/ip_calc.h"
 
-
-void arrayInput(String_View* sv_user_ip, Octetcs* pOctectArray)
+int arrayInput(String_View* sv_user_ip, Octetcs* pOctectArray)
 {
   for (int i = 0; i < 4; i++) {
     if (pOctectArray->count >= pOctectArray->capacity) {
@@ -22,10 +20,14 @@ void arrayInput(String_View* sv_user_ip, Octetcs* pOctectArray)
     pOctectArray->items[pOctectArray->count++] = chop_by_delim(sv_user_ip, '.');
 
     if (pOctectArray->items[i].count == 0 || pOctectArray->items[i].count > 3) {
-      printf("FORMATO INCORRECTO\n");
-      return;
+      return EXIT_FAILURE;
+    }
+
+    if (atoi(pOctectArray->items[i].data) > 255  || atoi(pOctectArray->items[i].data) < 0) {
+      return EXIT_FAILURE;
     }
   }
+  return EXIT_SUCCESS;
 }
 
 void calcType (Octetcs* pOctectArray, char* ipType)

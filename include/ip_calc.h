@@ -20,7 +20,7 @@ typedef struct {
   size_t capacity;
 } Octetcs;
 
-void arrayInput(String_View* sv_user_ip, Octetcs* pOctectArray);
+int arrayInput(String_View* sv_user_ip, Octetcs* pOctectArray);
 void calcNetAdrrs (Octetcs* pOctectArray, char* netAddrs);
 void addIP (Octetcs* netAddrs, int numberHosts, char* broadcast);
 void calcMasc(int* NumberHosts, int* masc, char* mascPunteada);
