@@ -27,6 +27,14 @@ int initNcurses()
   return EXIT_SUCCESS;
 }
 
+void endNcurses(WINDOW* mainWindow)
+{
+  werase(mainWindow);
+  wrefresh(mainWindow);
+  delwin(mainWindow);
+  endwin();
+}
+
 void showResults(ResultIP* results, int* numberAreas)
 {
   raw();
@@ -164,21 +172,14 @@ void showError(WINDOW* mainWindow, const char* message)
   delwin(mainWindow);
 }
 
-int calcALL (WINDOW* mainWindow, ResultIP* results, char* pUserIP, int* pNumberAreas)
+void calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* pNumberAreas)
 {
-  String_View sv_user_ip = sv(pUserIP);
-  Octetcs pOctectUser = {0};
-
-  if (arrayInput(&sv_user_ip, &pOctectUser)) {
-    showError(mainWindow, "FORMATO INCORRECTO");
-    return EXIT_FAILURE;
-  }
 
   char* netAddrs = calloc(15, sizeof(netAddrs));
   char* ipType = calloc(15, sizeof(ipType));
 
-  calcNetAdrrs(&pOctectUser, netAddrs);
-  calcType(&pOctectUser, ipType);
+  calcNetAdrrs(pOctectUser, netAddrs);
+  calcType(pOctectUser, ipType);
 
   for (int i = 0; i < *pNumberAreas; i++)
   {
@@ -205,19 +206,13 @@ int calcALL (WINDOW* mainWindow, ResultIP* results, char* pUserIP, int* pNumberA
     free(buffer);
     buffer = NULL;
 
-    String_View sv_net_ip = sv(netAddrs);
-
-    if (arrayInput(&sv_net_ip, &pOctectNet)) {
-      showError(mainWindow, "FORMATO INCORRECTO");
-      return EXIT_FAILURE;
-    }
-
     calcMasc(numberHosts, masc, mascPunteada);
 
+    String_View sv_net_ip = sv(netAddrs);
+    arrayInput(&sv_net_ip, &pOctectNet);
     addIP(&pOctectNet, *numberHosts - 1, broadcast);
 
     String_View sv_broad_ip = sv(broadcast);
-
     arrayInput(&sv_broad_ip, &pOctectbroad);
 
     addIP(&pOctectNet, 1, fistIP);
@@ -244,7 +239,7 @@ int calcALL (WINDOW* mainWindow, ResultIP* results, char* pUserIP, int* pNumberA
 
     arrayInput(&sv_new_ip, &pOctectNewNet);
 
-    pOctectUser = pOctectNewNet;
+    *pOctectUser = pOctectNewNet;
 
     free(numberHosts);
     free(broadcast);
@@ -257,5 +252,4 @@ int calcALL (WINDOW* mainWindow, ResultIP* results, char* pUserIP, int* pNumberA
 
   free(netAddrs);
   free(ipType);
-  return EXIT_SUCCESS;
 }

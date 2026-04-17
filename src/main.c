@@ -17,10 +17,23 @@ int main(void) {
 
   int numberAreas;
 
-  char* buffer = calloc(20, sizeof(buffer));
   char* ipUser = calloc(20, sizeof(char));
 
   askUserInput(mainWindow, ipUser, "INGRESE LA IP");
+
+  String_View sv_user_ip = sv(ipUser);
+  Octetcs pOctectUser = {0};
+
+  if (arrayInput(&sv_user_ip, &pOctectUser)) {
+    free(ipUser);
+
+    showError(mainWindow, "FORMATO INCORRECTO");
+    endNcurses(mainWindow);
+    return EXIT_FAILURE;
+  }
+
+  char* buffer = calloc(20, sizeof(buffer));
+
   askUserInput(mainWindow, buffer, "INGRESE LA CANTIDAD DE AREAS");
 
   numberAreas = atoi(buffer);
@@ -29,18 +42,13 @@ int main(void) {
   free(buffer);
   buffer = NULL;
 
-  if (calcALL(mainWindow, results, ipUser, &numberAreas)) {
-    return EXIT_FAILURE;
-  }
+  calcALL(mainWindow, results, &pOctectUser, &numberAreas);
 
   free(ipUser);
   ipUser = NULL;
 
   showResults(results, &numberAreas);
 
-  werase(mainWindow);
-  wrefresh(mainWindow);
-  delwin(mainWindow);
-  endwin();
+  endNcurses(mainWindow);
   return EXIT_SUCCESS;
 }
