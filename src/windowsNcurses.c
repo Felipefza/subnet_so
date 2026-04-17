@@ -112,7 +112,6 @@ void showResults(ResultIP* results, int* numberAreas)
 
 void askUserInput (WINDOW* mainWindow, char* outString, const char* message)
 {
-  char* buffer = calloc(1024, sizeof(buffer));
   int inptWidth, inptHeight, inputX, inputY;
 
   int lengthMessage = strlen(message);
@@ -121,7 +120,6 @@ void askUserInput (WINDOW* mainWindow, char* outString, const char* message)
   inptWidth = 20;
   inputY = LINES / 2;
   inputX = (COLS - 20) / 2;
-
 
   WINDOW* inputIPuser = newwin(inptHeight, inptWidth, inputY, inputX);
   box(inputIPuser, 0, 0);

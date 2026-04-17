@@ -70,14 +70,16 @@ void calcNetAdrrs (Octetcs* pOctectArray, char* netAddrs)
     strncat(netAddrs, pOctectArray->items[number].data, pOctectArray->items[number].count + 1);
   }
 
-  char* buffer = calloc(5, sizeof(char));
-
   power = pow(2, i);
 
   if (power == 1) power = 0;
 
+  char* buffer = calloc(5, sizeof(char));
+
   sprintf(buffer, "%d", power);
   strncat(netAddrs, buffer, 5);
+
+  free(buffer);
 }
 
 void calcMasc(int* numberHosts, int* masc, char* mascPunteada)
@@ -163,6 +165,8 @@ void addIP (Octetcs* pOctectNet, int numberHosts, char* broadcast)
       sum = dec + atoi(pOctectNet->items[i].data);
     }
   }
+
+  free(buffer);
 }
 
 int subIP (Octetcs* pOctectBroad, char* outIP, int subNumber) {
@@ -206,5 +210,8 @@ int subIP (Octetcs* pOctectBroad, char* outIP, int subNumber) {
     sprintf(outIP, "%s", buffer);
     i--;
   }
+
+  free(buffer);
+
   return EXIT_SUCCESS;
 }
