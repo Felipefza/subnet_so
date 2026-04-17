@@ -18,38 +18,12 @@ int initNcurses()
 
   if (has_colors() == FALSE) {
     endwin();
-    return 1;
+    return EXIT_FAILURE;
   }
 
   start_color();
   init_pair(1, COLOR_CYAN, COLOR_BLACK);
 
-  return 0;
-}
-
-int windowInput(WINDOW* mainWindow)
-{
-  char* buffer = calloc(20, sizeof(buffer));
-  char* ipUser = calloc(20, sizeof(char));
-
-  int numberAreas;
-
-  askUserInput(mainWindow, ipUser, "INGRESE LA IP");
-  askUserInput(mainWindow, buffer, "INGRESE LA CANTIDAD DE AREAS");
-
-  numberAreas = atoi(buffer);
-
-  ResultIP* results = calloc(numberAreas, sizeof(*results));
-
-  free(buffer);
-  buffer = NULL;
-
-  if (calcALL(mainWindow, results, ipUser, &numberAreas)) {
-  
-    return EXIT_FAILURE;
-  }
-
-  showResults(results, &numberAreas);
   return EXIT_SUCCESS;
 }
 
@@ -98,7 +72,6 @@ void showResults(ResultIP* results, int* numberAreas)
         mvwprintw(informationIP, 28, x / 2 - 22, "TIPO DE IP:                    %s", results[i].ipType);                     
 
         box(informationIP, 0, 0);
-
 
         wattron(informationIP, COLOR_PAIR(1));
         wattron(informationIP, A_BOLD);
@@ -189,15 +162,14 @@ void showError(WINDOW* mainWindow, const char* message)
 
   wclear(mainWindow);
   wrefresh(mainWindow);
+  delwin(messageWindow);
   delwin(mainWindow);
-  endwin();
 }
 
 int calcALL (WINDOW* mainWindow, ResultIP* results, char* pUserIP, int* pNumberAreas)
 {
   String_View sv_user_ip = sv(pUserIP);
   Octetcs pOctectUser = {0};
-
 
   if (arrayInput(&sv_user_ip, &pOctectUser)) {
     showError(mainWindow, "FORMATO INCORRECTO");
@@ -275,7 +247,17 @@ int calcALL (WINDOW* mainWindow, ResultIP* results, char* pUserIP, int* pNumberA
     arrayInput(&sv_new_ip, &pOctectNewNet);
 
     pOctectUser = pOctectNewNet;
+
+    free(numberHosts);
+    free(broadcast);
+    free(masc);
+    free(mascPunteada);
+    free(fistIP);
+    free(lastIP);
+    free(messageFormated);
   }
 
+  free(netAddrs);
+  free(ipType);
   return EXIT_SUCCESS;
 }
