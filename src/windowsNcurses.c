@@ -48,13 +48,30 @@ void showResults(ResultIP* results, int* numberAreas)
   WINDOW* informationIP = newwin(LINES - 2, COLS - 24, 1, 22);
   wrefresh(informationIP);
 
+  int informationMaxX, informationMaxY;
+  getmaxyx(informationIP, informationMaxY, informationMaxX);
+
+
   bool isRunning = true;
   int highlight = 0;
-  int information = 0;
+
+  box(informationIP, 0, 0);
+
+  wattron(informationIP, COLOR_PAIR(1));
+  wattron(informationIP, A_BOLD);
+  mvwprintw(informationIP, informationMaxY - 1, 2, " q: salir ");
+  mvwprintw(informationIP, informationMaxY - 1, 14, " k: arriba ");
+  mvwprintw(informationIP, informationMaxY - 1, 27, " j: abajo ");
+  wattroff(informationIP, A_BOLD);
+  wattroff(informationIP, COLOR_PAIR(1));
+
+  wrefresh(informationIP);
 
   while (isRunning) {
     for (int i = 0; i < *numberAreas; i++) {
       if (i == highlight) {
+        showInformation(informationIP, &highlight, results, &informationMaxX);
+
         wattron(menuIP, COLOR_PAIR(1));
         mvwprintw(menuIP, i + 1, 5, "AREA %03d", i + 1);
         wattroff(menuIP, COLOR_PAIR(1));
@@ -62,36 +79,10 @@ void showResults(ResultIP* results, int* numberAreas)
       else {
         mvwprintw(menuIP, i + 1, 5, "AREA %03d", i + 1);
       }
-
-      if (i == information) {
-        int x, y;
-        getmaxyx(informationIP, y, x);
-
-        wclear(informationIP);
-        mvwprintw(informationIP, 10, x / 2 - 11, "SUBNET AREA NUMERO %03d", i + 1); 
-        mvwprintw(informationIP, 12, x / 2 - 22, "IP:                            %s / %d", results[i].net, results[i].masc); 
-        mvwprintw(informationIP, 14, x / 2 - 22, "MASCARA PUNTEADA:              %s", results[i].mascPunteada); 
-        mvwprintw(informationIP, 16, x / 2 - 22, "RED:                           %s / %d\t\n", results[i].net, results[i].masc); 
-        mvwprintw(informationIP, 18, x / 2 - 22, "PRIMERA IP UTILIZABLE:         %s", results[i].fistIP);                     
-        mvwprintw(informationIP, 20, x / 2 - 22, "ULTIMA IP UTILIZABLE:          %s", results[i].lastIP);                     
-        mvwprintw(informationIP, 22, x / 2 - 22, "BROADCAST:                     %s", results[i].broadcast);                  
-        mvwprintw(informationIP, 24, x / 2 - 22, "CANTIDAD DE HOSTS TOTALES:     %d", results[i].numberHosts);                
-        mvwprintw(informationIP, 26, x / 2 - 22, "CANTIDAD DE HOSTS UTILIZABLES: %d", results[i].numberHosts - 2);            
-        mvwprintw(informationIP, 28, x / 2 - 22, "TIPO DE IP:                    %s", results[i].ipType);                     
-
-        box(informationIP, 0, 0);
-
-        wattron(informationIP, COLOR_PAIR(1));
-        wattron(informationIP, A_BOLD);
-        mvwprintw(informationIP, y - 1, 2, " q: salir ");                     
-        mvwprintw(informationIP, y - 1, 14, " k: arriba ");                     
-        mvwprintw(informationIP, y - 1, 27, " j: abajo ");                     
-        wattroff(informationIP, A_BOLD);
-        wattroff(informationIP, COLOR_PAIR(1));
-
-        wrefresh(informationIP);
-      }
     }
+    wrefresh(informationIP);
+    wrefresh(menuIP);
+
     switch (wgetch(menuIP)) {
       case KEY_UP:
         if (highlight > 0) highlight--;
@@ -110,11 +101,14 @@ void showResults(ResultIP* results, int* numberAreas)
         werase(informationIP);
         wrefresh(informationIP);
         delwin(informationIP);
+        werase(menuIP);
+        wrefresh(menuIP);
+        delwin(menuIP);
+        isRunning = false;
         break;
       default:
         break;
     }
-    information = highlight;
   }
 }
 
@@ -174,7 +168,6 @@ void showError(WINDOW* mainWindow, const char* message)
 
 void calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* pNumberAreas)
 {
-
   char* netAddrs = calloc(15, sizeof(netAddrs));
   char* ipType = calloc(15, sizeof(ipType));
 
@@ -252,4 +245,19 @@ void calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* 
 
   free(netAddrs);
   free(ipType);
+}
+
+void showInformation(WINDOW* window, int* index, ResultIP* results, int* maxX)
+{
+  werase(window);
+  mvwprintw(window, 10, *maxX / 2 - 11, "SUBNET AREA NUMERO %03d", *index + 1); 
+  mvwprintw(window, 12, *maxX / 2 - 22, "IP:                            %s / %d", results[*index].net, results[*index].masc); 
+  mvwprintw(window, 14, *maxX / 2 - 22, "MASCARA PUNTEADA:              %s", results[*index].mascPunteada); 
+  mvwprintw(window, 16, *maxX / 2 - 22, "RED:                           %s / %d\t\n", results[*index].net, results[*index].masc); 
+  mvwprintw(window, 18, *maxX / 2 - 22, "PRIMERA IP UTILIZABLE:         %s", results[*index].fistIP);                     
+  mvwprintw(window, 20, *maxX / 2 - 22, "ULTIMA IP UTILIZABLE:          %s", results[*index].lastIP);                     
+  mvwprintw(window, 22, *maxX / 2 - 22, "BROADCAST:                     %s", results[*index].broadcast);                  
+  mvwprintw(window, 24, *maxX / 2 - 22, "CANTIDAD DE HOSTS TOTALES:     %d", results[*index].numberHosts);                
+  mvwprintw(window, 26, *maxX / 2 - 22, "CANTIDAD DE HOSTS UTILIZABLES: %d", results[*index].numberHosts - 2);            
+  mvwprintw(window, 28, *maxX / 2 - 22, "TIPO DE IP:                    %s", results[*index].ipType);                     
 }
