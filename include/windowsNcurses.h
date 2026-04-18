@@ -11,7 +11,7 @@ void endNcurses(WINDOW* mainWindow);
 void askUserInput (WINDOW* mainWindow, char* outString, const char* message);
 void showResults(ResultIP* results, int* numberAreas);
 void showError(WINDOW* mainWindow, const char* message);
-void calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* pNumberAreas);
+int calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* pNumberAreas);
 void showInformation(WINDOW* window, int* index, ResultIP* results, int* maxX);
 
 #endif // !WINDOWNCURSES_H

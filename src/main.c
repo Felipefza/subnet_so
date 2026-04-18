@@ -42,7 +42,12 @@ int main(void) {
   free(buffer);
   buffer = NULL;
 
-  calcALL(mainWindow, results, &pOctectUser, &numberAreas);
+
+  if (calcALL(mainWindow, results, &pOctectUser, &numberAreas)) {
+    showError(mainWindow, "FORMATO INCORRECTO");
+    endNcurses(mainWindow);
+    return EXIT_FAILURE;
+  }
 
   free(ipUser);
   ipUser = NULL;

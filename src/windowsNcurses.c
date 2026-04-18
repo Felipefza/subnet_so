@@ -166,7 +166,7 @@ void showError(WINDOW* mainWindow, const char* message)
   delwin(mainWindow);
 }
 
-void calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* pNumberAreas)
+int calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* pNumberAreas)
 {
   char* netAddrs = calloc(15, sizeof(netAddrs));
   char* ipType = calloc(15, sizeof(ipType));
@@ -174,7 +174,10 @@ void calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* 
   calcNetAdrrs(pOctectUser, netAddrs);
   calcType(pOctectUser, ipType);
 
-  for (int i = 0; i < *pNumberAreas; i++)
+  int i = 0;
+  int EXIT = 0;
+
+  while (i < *pNumberAreas)
   {
     int* numberHosts = calloc(20, sizeof(numberHosts));
     char* broadcast = calloc(15, sizeof(broadcast));
@@ -203,7 +206,9 @@ void calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* 
 
     String_View sv_net_ip = sv(netAddrs);
     arrayInput(&sv_net_ip, &pOctectNet);
-    addIP(&pOctectNet, *numberHosts - 1, broadcast);
+    if (addIP(&pOctectNet, *numberHosts - 1, broadcast)) {
+      EXIT = 1;
+    }
 
     String_View sv_broad_ip = sv(broadcast);
     arrayInput(&sv_broad_ip, &pOctectbroad);
@@ -224,7 +229,9 @@ void calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* 
     results[i] = resultadoIP;
 
     sprintf(netAddrs, "%s", "");
-    addIP(&pOctectbroad, 1, netAddrs);
+    if (addIP(&pOctectbroad, 1, netAddrs)) {
+      EXIT = 1;
+    }
 
     Octetcs pOctectNewNet = {0};
 
@@ -241,10 +248,14 @@ void calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* 
     free(fistIP);
     free(lastIP);
     free(messageFormated);
+
+    i++;
   }
 
   free(netAddrs);
   free(ipType);
+
+  return EXIT;
 }
 
 void showInformation(WINDOW* window, int* index, ResultIP* results, int* maxX)

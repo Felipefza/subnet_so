@@ -22,7 +22,7 @@ typedef struct {
 
 int arrayInput(String_View* sv_user_ip, Octetcs* pOctectArray);
 void calcNetAdrrs (Octetcs* pOctectArray, char* netAddrs);
-void addIP (Octetcs* netAddrs, int numberHosts, char* broadcast);
+int addIP (Octetcs* pOctectNet, int numberHosts, char* broadcast);
 void calcMasc(int* NumberHosts, int* masc, char* mascPunteada);
 void calcType (Octetcs* pOctectArray, char* ipType);
 int subIP (Octetcs* pOctectBroad, char* lastIP, int addNumber);

@@ -127,7 +127,7 @@ void calcMasc(int* numberHosts, int* masc, char* mascPunteada)
 }
 
 
-void addIP (Octetcs* pOctectNet, int numberHosts, char* broadcast)
+int addIP (Octetcs* pOctectNet, int numberHosts, char* broadcast)
 {
   bool isRunning = true;
   int i = 3;
@@ -161,12 +161,18 @@ void addIP (Octetcs* pOctectNet, int numberHosts, char* broadcast)
 
     i--;
 
+
     if (i > -1) {
       sum = dec + atoi(pOctectNet->items[i].data);
+
+      if (i == 0 && sum > 255) {
+        return EXIT_FAILURE;
+      }
     }
   }
 
   free(buffer);
+  return EXIT_SUCCESS;
 }
 
 int subIP (Octetcs* pOctectBroad, char* outIP, int subNumber) {
@@ -179,7 +185,6 @@ int subIP (Octetcs* pOctectBroad, char* outIP, int subNumber) {
     sum = atoi(pOctectBroad->items[i].data) - subNumber;
     if (sum < 0) {
       if (i == 0 ) {
-        printf("IP RANGO MINIMO");
         return EXIT_FAILURE;
       };
 
