@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // LOCAL FILES
 #include "../include/windowsNcurses.h"
@@ -35,7 +36,7 @@ int main(void) {
   askUserInput(mainWindow, buffer, "INGRESE LA CANTIDAD DE AREAS");
 
   if (!isValidNumber(buffer)) {
-    showError(mainWindow, "SOLO NUMEROS");
+    showError(mainWindow, "SOLO NUMEROS POSITIVOS");
     return EXIT_FAILURE;
   }
 
@@ -45,14 +46,16 @@ int main(void) {
   free(buffer);
   buffer = NULL;
 
-  if (calcALL(mainWindow, results, &pOctectUser, &numberAreas)) {
-    return EXIT_FAILURE;
-  }
+  getResults(mainWindow, &pOctectUser, &numberAreas, results);
 
   free(ipUser);
   ipUser = NULL;
 
-  showResults(results, &numberAreas);
+  if (showResults(mainWindow, results, &numberAreas)) {
+    return EXIT_FAILURE;
+  }
+
+  free(results);
 
   endNcurses(mainWindow);
   return EXIT_SUCCESS;

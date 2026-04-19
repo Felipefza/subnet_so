@@ -1,17 +1,6 @@
-logging debugredirect:  off: Debug output will go to both the screen and the log file.
-logging enabled:  on: Logging is enabled.
-logging file:  The current logfile is "gdb.txt".
-logging overwrite:  on: Logging overwrites the log file.
-logging redirect:  off: Output will go to both the screen and the log file.
-Starting program: /home/felipe/Proyects/subnet_so/build/program 
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library "/usr/lib/libthread_db.so.1".
 
-Program received signal SIGINT, Interrupt.
-0x0000555555557188 in isValidNumber ()
-❌️ Not confirmed.
-logging debugredirect:  off: Debug output will go to both the screen and the log file.
-logging enabled:  on: Logging is enabled.
-logging file:  The current logfile is "gdb.txt".
-logging overwrite:  on: Logging overwrites the log file.
-logging redirect:  off: Output will go to both the screen and the log file.
+Program received signal SIGSEGV, Segmentation fault.
+werase (win=0x55555562a090) at ../ncurses/./base/lib_erase.c:65
+65		    end = &start[win->_maxx];

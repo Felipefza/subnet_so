@@ -25,7 +25,7 @@ void calcNetAdrrs (Octetcs* pOctectArray, char* netAddrs);
 int addIP (Octetcs* pOctectNet, int numberHosts, char* broadcast);
 void calcMasc(int* NumberHosts, int* masc, char* mascPunteada);
 void calcType (Octetcs* pOctectArray, char* ipType);
-int subIP (Octetcs* pOctectBroad, char* lastIP, int addNumber);
+int subIP (Octetcs* pOctectBroad, char* outIP, int subNumber);
 void printResults (ResultIP* results, int* pNumberAreas);
 
 #endif // !IP_CALC_H

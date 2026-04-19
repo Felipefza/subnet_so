@@ -183,6 +183,7 @@ int subIP (Octetcs* pOctectBroad, char* outIP, int subNumber) {
 
   while (i > -1 && isRunning) {
     sum = atoi(pOctectBroad->items[i].data) - subNumber;
+
     if (sum < 0) {
       if (i == 0 ) {
         return EXIT_FAILURE;

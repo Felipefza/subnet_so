@@ -46,7 +46,7 @@ void endNcurses(WINDOW* mainWindow)
   endwin();
 }
 
-void showResults(ResultIP* results, int* numberAreas)
+int showResults(WINDOW* mainWindow, ResultIP* results, int* numberAreas)
 {
   raw();
   noecho();
@@ -88,9 +88,14 @@ void showResults(ResultIP* results, int* numberAreas)
 
     werase(informationIP);
 
+    if (LINES < 14) {
+      showError(mainWindow, "LA VENTANA TIENE QUE SER MAYOR QUE 14 LINEAS");
+      return EXIT_FAILURE;
+    }
+
     setMenuIP(menuIP, &highlight, &min, &max);
     setIndex(menuIP, &informationMaxY, &index, &isLast);
-    showInformation(informationIP, &highlight, results, &informationMaxX);
+    showInformation(informationIP, &highlight, results, &informationMaxX, &informationMaxY);
 
     box(informationIP, 0, 0);
 
@@ -134,6 +139,7 @@ void showResults(ResultIP* results, int* numberAreas)
         break;
     }
   }
+  return EXIT_SUCCESS;
 }
 
 void askUserInput (WINDOW* mainWindow, char* outString, const char* message)
@@ -190,68 +196,47 @@ void showError(WINDOW* mainWindow, const char* message)
   endNcurses(mainWindow);
 }
 
-int calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* pNumberAreas)
+void getResults(WINDOW* mainWindow, Octetcs* pOctectUser, int* numberAreas, ResultIP* results)
 {
-  char* netAddrs = calloc(15, sizeof(netAddrs));
-  char* ipType = calloc(15, sizeof(ipType));
-
-  int* numberHosts = calloc(20, sizeof(numberHosts));
-  char* broadcast = calloc(15, sizeof(broadcast));
-  int* masc = calloc(2, sizeof(masc));
-  char* mascPunteada = calloc(35, sizeof(mascPunteada));
-
-  char* fistIP = calloc(20, sizeof(fistIP));
-  char* lastIP = calloc(20, sizeof(lastIP));
-
   char* messageFormated = calloc(40, sizeof(messageFormated));
 
-  calcNetAdrrs(pOctectUser, netAddrs);
+  char* net = calloc(16, sizeof(*net));
+  char* ipType = calloc(30, sizeof(*ipType));
+
+  int* numberHosts = calloc(15, sizeof(*numberHosts));
+
+  char* fistIP = calloc(15, sizeof(*fistIP));
+  char* lastIP = calloc(15, sizeof(*lastIP));
+
+  int* masc = calloc(3, sizeof(*masc));
+  char* mascPunteada = calloc(35, sizeof(*mascPunteada));
+  char* broadcast = calloc(16, sizeof(*broadcast));
+
+  calcNetAdrrs(pOctectUser, net);
   calcType(pOctectUser, ipType);
 
-  int i = 0;
-  int EXIT = 0;
-
-  while (i < *pNumberAreas)
-  {
+  for (int index = 0; index < *numberAreas; index++) {
     *numberHosts = 0;
-    sprintf(broadcast, " ");
     *masc = 0;
-    sprintf(mascPunteada, " ");
 
-    sprintf(fistIP, " ");
-    sprintf(lastIP, " ");
+    sprintf(mascPunteada, "%s", "");
 
-    sprintf(messageFormated, " ");
+    sprintf(fistIP, "%s", "");
+    sprintf(lastIP, "%s", "");
 
     Octetcs pOctectNet = {0};
     Octetcs pOctectbroad = {0};
 
-    char* buffer = calloc(20, sizeof(buffer));
+    sprintf(messageFormated, "%s %d", "INGRESE LOS HOSTS DE AREA NUMERO", index + 1);
 
-    sprintf(messageFormated, "%s %d", "INGRESE LOS HOSTS DE AREA NUMERO", i + 1);
-
-    askUserInput(mainWindow, buffer, messageFormated);
-
-    if (!isValidNumber(buffer)) {
-      EXIT = 1;
-      showError(mainWindow, "VALOR INVALIDO");
-      break;
-    }
-
-    *numberHosts = atoi(buffer);
-
-    free(buffer);
-    buffer = NULL;
+    getHosts(mainWindow, numberHosts, messageFormated);
 
     calcMasc(numberHosts, masc, mascPunteada);
 
-    String_View sv_net_ip = sv(netAddrs);
+    String_View sv_net_ip = sv(net);
     arrayInput(&sv_net_ip, &pOctectNet);
-    if (addIP(&pOctectNet, *numberHosts - 1, broadcast)) {
-      EXIT = 1;
-      showError(mainWindow, "SE LLEGO AL MAXIMO IP");
-      break;
-    }
+
+    getBroadcast(mainWindow, numberHosts, broadcast, &pOctectNet);
 
     String_View sv_broad_ip = sv(broadcast);
     arrayInput(&sv_broad_ip, &pOctectbroad);
@@ -259,62 +244,95 @@ int calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* p
     addIP(&pOctectNet, 1, fistIP);
     subIP(&pOctectbroad, lastIP, 1);
 
-    ResultIP resultadoIP = {
-      strdup(netAddrs), 
-      *masc, 
-      strdup(mascPunteada), 
-      strdup(broadcast), 
-      strdup(fistIP), 
-      strdup(lastIP), 
-      *numberHosts, 
+    ResultIP tmpResult = {
+      strdup(net),
+      *masc,
+      strdup(mascPunteada),
+      strdup(broadcast),
+      strdup(fistIP),
+      strdup(lastIP),
+      *numberHosts,
       strdup(ipType)
     };
-    results[i] = resultadoIP;
 
-    sprintf(netAddrs, "%s", "");
-    if (addIP(&pOctectbroad, 1, netAddrs)) {
-      EXIT = 1;
-      showError(mainWindow, "SE LLEGO AL MAXIMO IP");
-      break;
-    }
+    results[index] = tmpResult;
 
-    Octetcs pOctectNewNet = {0};
-
-    String_View sv_new_ip = sv(netAddrs);
-
-    arrayInput(&sv_new_ip, &pOctectNewNet);
-
-    *pOctectUser = pOctectNewNet;
-    i++;
+    resetNet(mainWindow, net, &pOctectbroad, pOctectUser);
   }
-
   free(numberHosts);
-  free(broadcast);
   free(masc);
   free(mascPunteada);
   free(fistIP);
   free(lastIP);
-  free(messageFormated);
 
-  free(netAddrs);
+
+  free(net);
   free(ipType);
-
-  return EXIT;
 }
 
-void showInformation(WINDOW* window, int* index, ResultIP* results, int* maxX)
+void showInformation(WINDOW* window, int* index, ResultIP* results, int* maxX, int* maxY)
 {
-  mvwprintw(window, 10, *maxX / 2 - 11, "SUBNET AREA NUMERO %03d", *index + 1); 
-  mvwprintw(window, 12, *maxX / 2 - 22, "IP:                            %s / %d", results[*index].net, results[*index].masc); 
-  mvwprintw(window, 14, *maxX / 2 - 22, "MASCARA PUNTEADA:              %s", results[*index].mascPunteada); 
-  mvwprintw(window, 16, *maxX / 2 - 22, "RED:                           %s / %d\t\n", results[*index].net, results[*index].masc); 
-  mvwprintw(window, 18, *maxX / 2 - 22, "PRIMERA IP UTILIZABLE:         %s", results[*index].fistIP);                     
-  mvwprintw(window, 20, *maxX / 2 - 22, "ULTIMA IP UTILIZABLE:          %s", results[*index].lastIP);                     
-  mvwprintw(window, 22, *maxX / 2 - 22, "BROADCAST:                     %s", results[*index].broadcast);                  
-  mvwprintw(window, 24, *maxX / 2 - 22, "CANTIDAD DE HOSTS TOTALES:     %d", results[*index].numberHosts);                
-  mvwprintw(window, 26, *maxX / 2 - 22, "CANTIDAD DE HOSTS UTILIZABLES: %d", results[*index].numberHosts - 2);            
-  mvwprintw(window, 28, *maxX / 2 - 22, "TIPO DE IP:                    %s", results[*index].ipType);                     
+  mvwprintw(window, *maxY / 2 - 10, *maxX / 2 - 11, "SUBNET AREA NUMERO %03d", *index + 1); 
+  mvwprintw(window, *maxY / 2 - 10 + 2, *maxX / 2 - 22, "IP:                            %s / %d", results[*index].net, results[*index].masc); 
+  mvwprintw(window, *maxY / 2 - 10 + 4, *maxX / 2 - 22, "MASCARA PUNTEADA:              %s", results[*index].mascPunteada); 
+  mvwprintw(window, *maxY / 2 - 10 + 6, *maxX / 2 - 22, "RED:                           %s / %d\t\n", results[*index].net, results[*index].masc); 
+  mvwprintw(window, *maxY / 2 - 10 + 8, *maxX / 2 - 22, "PRIMERA IP UTILIZABLE:         %s", results[*index].fistIP);                     
+  mvwprintw(window, *maxY / 2 - 10 + 10, *maxX / 2 - 22, "ULTIMA IP UTILIZABLE:          %s", results[*index].lastIP);                     
+  mvwprintw(window, *maxY / 2 - 10 + 12, *maxX / 2 - 22, "BROADCAST:                     %s", results[*index].broadcast);                  
+  mvwprintw(window, *maxY / 2 - 10 + 14, *maxX / 2 - 22, "CANTIDAD DE HOSTS TOTALES:     %d", results[*index].numberHosts);                
+  mvwprintw(window, *maxY / 2 - 10 + 16, *maxX / 2 - 22, "CANTIDAD DE HOSTS UTILIZABLES: %d", results[*index].numberHosts - 2);            
+  mvwprintw(window, *maxY / 2 - 10 + 18, *maxX / 2 - 22, "TIPO DE IP:                    %s", results[*index].ipType);                     
 }
+
+int resetNet(WINDOW* mainWindow, char* net, Octetcs* pOctectbroad, Octetcs* pOctectUser)
+{
+  sprintf(net, "%s", "");
+  if (addIP(pOctectbroad, 1, net)) {
+    showError(mainWindow, "SE LLEGO AL MAXIMO IP");
+    return EXIT_FAILURE;
+  }
+  Octetcs pOctectNewNet = {0};
+
+  String_View sv_new_ip = sv(net);
+  arrayInput(&sv_new_ip, &pOctectNewNet);
+
+  *pOctectUser = pOctectNewNet;
+
+  return EXIT_SUCCESS;
+}
+
+int getHosts(WINDOW* mainWindow, int* numberHosts, const char* message)
+{
+  *numberHosts = 0;
+
+  char* buffer = calloc(20, sizeof(buffer));
+
+  askUserInput(mainWindow, buffer, message);
+
+  if (!isValidNumber(buffer)) {
+    showError(mainWindow, "SOLO NUMEROS POSITIVOS");
+    return EXIT_FAILURE;
+  }
+
+  *numberHosts = atoi(buffer);
+
+  free(buffer);
+  buffer = NULL;
+
+  return EXIT_SUCCESS;
+}
+
+int getBroadcast(WINDOW* mainWindow, int* numberHosts, char* broadcast, Octetcs* pOctectNet)
+{
+  sprintf(broadcast, " ");
+  if (addIP(pOctectNet, *numberHosts - 1, broadcast)) {
+    showError(mainWindow, "SE LLEGO AL MAXIMO IP");
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
+
+}
+
 
 void setMenuIP(WINDOW* menuIP, int* highlight, int* min, int* max)
 {
@@ -364,8 +382,13 @@ void setIndex(WINDOW* informationIP, int* maxY, int* index, bool* isLast)
 
   char* buffer = calloc(3, sizeof(buffer));
   sprintf(buffer, "%02d", *index + 1);
+
+
   setColorMvwprint(informationIP, &INDEX_COLOR, &Y_CHAR, &X_MIDDLE_CHAR, "%s", buffer);
   wattroff(informationIP, A_BOLD);
+
+  free(buffer);
+  buffer = NULL;
 }
 
 void showHints(WINDOW* informationIP, int* maxY)
