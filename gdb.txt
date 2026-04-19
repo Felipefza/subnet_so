@@ -1,6 +1,0 @@
-[Thread debugging using libthread_db enabled]
-Using host libthread_db library "/usr/lib/libthread_db.so.1".
-
-Program received signal SIGSEGV, Segmentation fault.
-werase (win=0x55555562a090) at ../ncurses/./base/lib_erase.c:65
-65		    end = &start[win->_maxx];
