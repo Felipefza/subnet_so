@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-
 
 // LOCAL FILES
 #include "../include/ip_calc.h"
@@ -24,7 +22,18 @@ int initNcurses()
   }
 
   start_color();
+
+  /*
+   * 1 : USER CHOICE AND HINTS
+   * 2 : LIMIT INDEX *
+   * 3 : CAN CHANGE PAGE TO THE RIGHT +
+   * 4 : CAN CHANGE PAGE TO THE LEFT -
+    */
+
   init_pair(1, COLOR_CYAN, COLOR_BLACK);
+  init_pair(2, COLOR_MAGENTA, COLOR_BLACK);
+  init_pair(3, COLOR_GREEN, COLOR_BLACK);
+  init_pair(4, COLOR_RED, COLOR_BLACK);
 
   return EXIT_SUCCESS;
 }
@@ -223,7 +232,7 @@ int calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* p
 
     askUserInput(mainWindow, buffer, messageFormated);
 
-    if (isValidNumber(buffer)) {
+    if (!isValidNumber(buffer)) {
       EXIT = 1;
       showError(mainWindow, "VALOR INVALIDO");
       break;
@@ -325,22 +334,38 @@ void setMenuIP(WINDOW* menuIP, int* highlight, int* min, int* max)
 
 void setIndex(WINDOW* informationIP, int* maxY, int* index, bool* isLast)
 {
-  wattron(informationIP, COLOR_PAIR(1));
   wattron(informationIP, A_BOLD);
-  if (*index == 0) {
-    mvwprintw(informationIP, *maxY - 3, 4, "*");
-    mvwprintw(informationIP, *maxY - 3, 14, "+");
-  } else if (isLast) {
-    mvwprintw(informationIP, *maxY - 3, 4, "-");
-    mvwprintw(informationIP, *maxY - 3, 14, "*");
+  int Y_CHAR = (*maxY - 3);
+
+  int X_FIRST_CHAR = 4;
+  int X_MIDDLE_CHAR = 8;
+  int X_LAST_CHAR = 14;
+
+  int INDEX_COLOR = 1;
+  int MULT_SIGN_COLOR = 2;
+  int PLUS_SIGN_COLOR = 3;
+  int NEGATIVE_SIGN_COLOR = 4;
+
+  if (*index == 0 && *isLast) {
+    setColorMvwprint(informationIP, &MULT_SIGN_COLOR, &Y_CHAR, &X_FIRST_CHAR, "%s", "*");
+    setColorMvwprint(informationIP, &MULT_SIGN_COLOR, &Y_CHAR, &X_LAST_CHAR, "%s", "*");
+
+  } else if (*index == 0) {
+    setColorMvwprint(informationIP, &MULT_SIGN_COLOR, &Y_CHAR, &X_FIRST_CHAR, "%s", "*");
+    setColorMvwprint(informationIP, &PLUS_SIGN_COLOR, &Y_CHAR, &X_LAST_CHAR, "%s", "+");
+
+  } else if (*isLast) {
+    setColorMvwprint(informationIP, &NEGATIVE_SIGN_COLOR, &Y_CHAR, &X_FIRST_CHAR, "%s", "-");
+    setColorMvwprint(informationIP, &MULT_SIGN_COLOR, &Y_CHAR, &X_LAST_CHAR, "%s", "*");
   } else {
-    mvwprintw(informationIP, *maxY - 3, 4, "-");
-    mvwprintw(informationIP, *maxY - 3, 14, "+");
+    setColorMvwprint(informationIP, &NEGATIVE_SIGN_COLOR, &Y_CHAR, &X_FIRST_CHAR, "%s", "-");
+    setColorMvwprint(informationIP, &PLUS_SIGN_COLOR, &Y_CHAR, &X_LAST_CHAR, "%s", "+");
   }
 
-  mvwprintw(informationIP, *maxY - 3, 8, "%02d", *index);
+  char* buffer = calloc(3, sizeof(buffer));
+  sprintf(buffer, "%02d", *index + 1);
+  setColorMvwprint(informationIP, &INDEX_COLOR, &Y_CHAR, &X_MIDDLE_CHAR, "%s", buffer);
   wattroff(informationIP, A_BOLD);
-  wattroff(informationIP, COLOR_PAIR(1));
 }
 
 void showHints(WINDOW* informationIP, int* maxY)
@@ -349,8 +374,8 @@ void showHints(WINDOW* informationIP, int* maxY)
     " q: salir ",
     " k: arriba ",
     " j: abajo ",
-    " h: izquierda ",
-    " l: derecha "
+    " h: pagina anterior ",
+    " l: pagina siguiente "
   };
 
   int hintLenght = sizeof(hintsList) / sizeof(*hintsList); 
@@ -375,4 +400,11 @@ void exitWindow(WINDOW* window)
   werase(window);
   wrefresh(window);
   delwin(window);
+}
+
+void setColorMvwprint(WINDOW* window, int* indexColorPair, int* y, int* x, char* format, const char* message)
+{
+  wattron(window, COLOR_PAIR(*indexColorPair));
+  mvwprintw(window, *y, *x, format, message);
+  wattroff(window, COLOR_PAIR(*indexColorPair));
 }

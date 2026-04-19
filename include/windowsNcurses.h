@@ -22,5 +22,7 @@ void exitWindow(WINDOW* window);
 
 int calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* pNumberAreas);
 
+void setColorMvwprint(WINDOW* window, int* indexColorPair, int* y, int* x, char* format, const char* message);
+
 #endif // !WINDOWNCURSES_H
 

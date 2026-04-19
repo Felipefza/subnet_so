@@ -34,7 +34,7 @@ int main(void) {
 
   askUserInput(mainWindow, buffer, "INGRESE LA CANTIDAD DE AREAS");
 
-  if (isValidNumber(buffer)) {
+  if (!isValidNumber(buffer)) {
     showError(mainWindow, "SOLO NUMEROS");
     return EXIT_FAILURE;
   }

@@ -2,6 +2,8 @@
 
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
 String_View sv(const char* cstr)
 {
@@ -72,11 +74,12 @@ String_View chop_by_delim(String_View* sv, char delim)
 
 bool isValidNumber(char* string)
 {
+  if (strlen(string) == 0) return false;
   if (*string == '\0') return false;
   if (*string == '-') return false;
 
   while (*string) {
-    if (isdigit(*string)) {
+    if (!isdigit(*string)) {
       return false;
     }
     string++;
