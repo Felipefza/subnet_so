@@ -1,0 +1,6 @@
+Starting program: /home/felipe/Proyects/subnet_so/build/program 
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/usr/lib/libthread_db.so.1".
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000055555555760e in calcALL ()

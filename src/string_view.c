@@ -1,6 +1,7 @@
 #include "../include/string_view.h"
 
 #include <ctype.h>
+#include <stdbool.h>
 
 String_View sv(const char* cstr)
 {
@@ -67,4 +68,25 @@ String_View chop_by_delim(String_View* sv, char delim)
   String_View result = *sv;
   sv_chop_left(sv, sv->count);
   return result;
+}
+
+bool isValidNumber(char* string)
+{
+  if (*string == '\0') return false;
+  if (*string == '-') return false;
+
+  while (*string) {
+    if (isdigit(*string)) {
+      return false;
+    }
+    string++;
+  }
+  return true;
+}
+
+int minTwoNumbers(int* a, int* b)
+{
+  if (*a < *b) return *a;
+
+  return *b;
 }

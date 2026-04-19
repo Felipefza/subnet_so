@@ -2,6 +2,7 @@
 #define STRING_VIEW_H
 
 #include <string.h>
+#include <stdbool.h>
 
 typedef struct {
   const char* data;
@@ -20,5 +21,7 @@ void sv_trim(String_View* sv);
 
 String_View chop_by_delim(String_View* sv, char delim);
 
+bool isValidNumber(char* string);
+int minTwoNumbers(int* a, int* b);
 
-#endif // STRING_VIEW_H
+#endif // !STRING_VIEW_H

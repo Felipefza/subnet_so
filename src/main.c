@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 // LOCAL FILES
@@ -15,8 +16,6 @@ int main(void) {
   WINDOW* mainWindow = newwin(LINES, COLS, 0, 0);
   box(mainWindow, 0, 0);
 
-  int numberAreas;
-
   char* ipUser = calloc(20, sizeof(char));
 
   askUserInput(mainWindow, ipUser, "INGRESE LA IP");
@@ -28,7 +27,6 @@ int main(void) {
     free(ipUser);
 
     showError(mainWindow, "FORMATO INCORRECTO");
-    endNcurses(mainWindow);
     return EXIT_FAILURE;
   }
 
@@ -36,16 +34,18 @@ int main(void) {
 
   askUserInput(mainWindow, buffer, "INGRESE LA CANTIDAD DE AREAS");
 
-  numberAreas = atoi(buffer);
+  if (isValidNumber(buffer)) {
+    showError(mainWindow, "SOLO NUMEROS");
+    return EXIT_FAILURE;
+  }
+
+  int numberAreas = atoi(buffer);
   ResultIP* results = calloc(numberAreas, sizeof(*results));
 
   free(buffer);
   buffer = NULL;
 
-
   if (calcALL(mainWindow, results, &pOctectUser, &numberAreas)) {
-    showError(mainWindow, "FORMATO INCORRECTO");
-    endNcurses(mainWindow);
     return EXIT_FAILURE;
   }
 

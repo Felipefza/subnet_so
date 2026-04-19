@@ -1,8 +1,10 @@
 #include <ncurses.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 
 // LOCAL FILES
@@ -29,9 +31,9 @@ int initNcurses()
 
 void endNcurses(WINDOW* mainWindow)
 {
-  werase(mainWindow);
-  wrefresh(mainWindow);
-  delwin(mainWindow);
+  curs_set(1);
+  echo();
+  exitWindow(mainWindow);
   endwin();
 }
 
@@ -47,64 +49,77 @@ void showResults(ResultIP* results, int* numberAreas)
 
   WINDOW* informationIP = newwin(LINES - 2, COLS - 24, 1, 22);
   wrefresh(informationIP);
+  box(informationIP, 0, 0);
 
   int informationMaxX, informationMaxY;
   getmaxyx(informationIP, informationMaxY, informationMaxX);
 
-
   bool isRunning = true;
   int highlight = 0;
 
-  box(informationIP, 0, 0);
-
-  wattron(informationIP, COLOR_PAIR(1));
-  wattron(informationIP, A_BOLD);
-  mvwprintw(informationIP, informationMaxY - 1, 2, " q: salir ");
-  mvwprintw(informationIP, informationMaxY - 1, 14, " k: arriba ");
-  mvwprintw(informationIP, informationMaxY - 1, 27, " j: abajo ");
-  wattroff(informationIP, A_BOLD);
-  wattroff(informationIP, COLOR_PAIR(1));
-
   wrefresh(informationIP);
 
-  while (isRunning) {
-    for (int i = 0; i < *numberAreas; i++) {
-      if (i == highlight) {
-        showInformation(informationIP, &highlight, results, &informationMaxX);
+  int AREAS_PER_PAGE = informationMaxY / 2 - 4;
+  int index = 0;
+  bool isLast = false;
 
-        wattron(menuIP, COLOR_PAIR(1));
-        mvwprintw(menuIP, i + 1, 5, "AREA %03d", i + 1);
-        wattroff(menuIP, COLOR_PAIR(1));
-      }
-      else {
-        mvwprintw(menuIP, i + 1, 5, "AREA %03d", i + 1);
-      }
+  while (isRunning) {
+    int tmp = AREAS_PER_PAGE * (index + 1);
+    int min = AREAS_PER_PAGE * index;
+    int max = minTwoNumbers(&tmp, numberAreas);
+
+    if (max - *numberAreas == 0) {
+      isLast = true;
+    } else {
+      isLast = false;
     }
+
+    werase(menuIP);
+    box(menuIP, 0, 0);
+
+    werase(informationIP);
+
+    setMenuIP(menuIP, &highlight, &min, &max);
+    setIndex(menuIP, &informationMaxY, &index, &isLast);
+    showInformation(informationIP, &highlight, results, &informationMaxX);
+
+    box(informationIP, 0, 0);
+
+    showHints(informationIP, &informationMaxY);
+
     wrefresh(informationIP);
     wrefresh(menuIP);
 
     switch (wgetch(menuIP)) {
       case KEY_UP:
-        if (highlight > 0) highlight--;
+        if (highlight > min) highlight--;
         break;
       case KEY_DOWN:
-        if (highlight < *numberAreas - 1) highlight++;
+        if (highlight < max) highlight++;
         break;
       case 'k':
-        if (highlight > 0) highlight--;
+        if (highlight > min) highlight--;
         break;
       case 'j':
-        if (highlight < *numberAreas - 1) highlight++;
+        if (highlight < max - 1) highlight++;
+        break;
+      case 'h':
+        if (min != 0) {
+          index--;
+          highlight = min - AREAS_PER_PAGE;
+        }
+        break;
+      case 'l':
+        if (max - *numberAreas != 0) {
+          index++;
+          highlight = min + AREAS_PER_PAGE;
+        }
         break;
       case 'q':
         isRunning = false;
-        werase(informationIP);
-        wrefresh(informationIP);
-        delwin(informationIP);
-        werase(menuIP);
-        wrefresh(menuIP);
-        delwin(menuIP);
-        isRunning = false;
+
+        exitWindow(informationIP);
+        exitWindow(menuIP);
         break;
       default:
         break;
@@ -114,6 +129,9 @@ void showResults(ResultIP* results, int* numberAreas)
 
 void askUserInput (WINDOW* mainWindow, char* outString, const char* message)
 {
+  werase(mainWindow);
+  box(mainWindow, 0, 0);
+
   int inptWidth, inptHeight, inputX, inputY;
 
   int lengthMessage = strlen(message);
@@ -132,13 +150,9 @@ void askUserInput (WINDOW* mainWindow, char* outString, const char* message)
 
   mvwgetstr(inputIPuser, 1, 2, outString);
 
-  wborder(inputIPuser, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-  wclear(inputIPuser);
-  wrefresh(inputIPuser);
-
+  exitWindow(inputIPuser);
   mvwprintw(mainWindow, inputY - 1, inputX - 4, "                            ");
   wrefresh(mainWindow);
-  delwin(inputIPuser);
 }
 
 void showError(WINDOW* mainWindow, const char* message)
@@ -160,16 +174,27 @@ void showError(WINDOW* mainWindow, const char* message)
 
   wgetch(errorWindow);
 
-  wclear(mainWindow);
-  wrefresh(mainWindow);
-  delwin(messageWindow);
-  delwin(mainWindow);
+
+  exitWindow(errorWindow);
+  exitWindow(messageWindow);
+
+  endNcurses(mainWindow);
 }
 
 int calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* pNumberAreas)
 {
   char* netAddrs = calloc(15, sizeof(netAddrs));
   char* ipType = calloc(15, sizeof(ipType));
+
+  int* numberHosts = calloc(20, sizeof(numberHosts));
+  char* broadcast = calloc(15, sizeof(broadcast));
+  int* masc = calloc(2, sizeof(masc));
+  char* mascPunteada = calloc(35, sizeof(mascPunteada));
+
+  char* fistIP = calloc(20, sizeof(fistIP));
+  char* lastIP = calloc(20, sizeof(lastIP));
+
+  char* messageFormated = calloc(40, sizeof(messageFormated));
 
   calcNetAdrrs(pOctectUser, netAddrs);
   calcType(pOctectUser, ipType);
@@ -179,23 +204,30 @@ int calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* p
 
   while (i < *pNumberAreas)
   {
-    int* numberHosts = calloc(20, sizeof(numberHosts));
-    char* broadcast = calloc(15, sizeof(broadcast));
-    int* masc = calloc(2, sizeof(masc));
-    char* mascPunteada = calloc(35, sizeof(mascPunteada));
+    *numberHosts = 0;
+    sprintf(broadcast, " ");
+    *masc = 0;
+    sprintf(mascPunteada, " ");
 
-    char* fistIP = calloc(20, sizeof(fistIP));
-    char* lastIP = calloc(20, sizeof(lastIP));
+    sprintf(fistIP, " ");
+    sprintf(lastIP, " ");
+
+    sprintf(messageFormated, " ");
 
     Octetcs pOctectNet = {0};
     Octetcs pOctectbroad = {0};
 
     char* buffer = calloc(20, sizeof(buffer));
 
-    char* messageFormated = calloc(40, sizeof(messageFormated));
-    sprintf(messageFormated, "%s %d", "INGRESE LOS HOSTS DE AREA NUMERO", i);
+    sprintf(messageFormated, "%s %d", "INGRESE LOS HOSTS DE AREA NUMERO", i + 1);
 
     askUserInput(mainWindow, buffer, messageFormated);
+
+    if (isValidNumber(buffer)) {
+      EXIT = 1;
+      showError(mainWindow, "VALOR INVALIDO");
+      break;
+    }
 
     *numberHosts = atoi(buffer);
 
@@ -208,6 +240,8 @@ int calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* p
     arrayInput(&sv_net_ip, &pOctectNet);
     if (addIP(&pOctectNet, *numberHosts - 1, broadcast)) {
       EXIT = 1;
+      showError(mainWindow, "SE LLEGO AL MAXIMO IP");
+      break;
     }
 
     String_View sv_broad_ip = sv(broadcast);
@@ -231,6 +265,8 @@ int calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* p
     sprintf(netAddrs, "%s", "");
     if (addIP(&pOctectbroad, 1, netAddrs)) {
       EXIT = 1;
+      showError(mainWindow, "SE LLEGO AL MAXIMO IP");
+      break;
     }
 
     Octetcs pOctectNewNet = {0};
@@ -240,17 +276,16 @@ int calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* p
     arrayInput(&sv_new_ip, &pOctectNewNet);
 
     *pOctectUser = pOctectNewNet;
-
-    free(numberHosts);
-    free(broadcast);
-    free(masc);
-    free(mascPunteada);
-    free(fistIP);
-    free(lastIP);
-    free(messageFormated);
-
     i++;
   }
+
+  free(numberHosts);
+  free(broadcast);
+  free(masc);
+  free(mascPunteada);
+  free(fistIP);
+  free(lastIP);
+  free(messageFormated);
 
   free(netAddrs);
   free(ipType);
@@ -260,7 +295,6 @@ int calcALL (WINDOW* mainWindow, ResultIP* results, Octetcs* pOctectUser, int* p
 
 void showInformation(WINDOW* window, int* index, ResultIP* results, int* maxX)
 {
-  werase(window);
   mvwprintw(window, 10, *maxX / 2 - 11, "SUBNET AREA NUMERO %03d", *index + 1); 
   mvwprintw(window, 12, *maxX / 2 - 22, "IP:                            %s / %d", results[*index].net, results[*index].masc); 
   mvwprintw(window, 14, *maxX / 2 - 22, "MASCARA PUNTEADA:              %s", results[*index].mascPunteada); 
@@ -271,4 +305,74 @@ void showInformation(WINDOW* window, int* index, ResultIP* results, int* maxX)
   mvwprintw(window, 24, *maxX / 2 - 22, "CANTIDAD DE HOSTS TOTALES:     %d", results[*index].numberHosts);                
   mvwprintw(window, 26, *maxX / 2 - 22, "CANTIDAD DE HOSTS UTILIZABLES: %d", results[*index].numberHosts - 2);            
   mvwprintw(window, 28, *maxX / 2 - 22, "TIPO DE IP:                    %s", results[*index].ipType);                     
+}
+
+void setMenuIP(WINDOW* menuIP, int* highlight, int* min, int* max)
+{
+  int j = 1;
+  for (int i = *min; i < *max; i++) {
+    if (i == *highlight) {
+      wattron(menuIP, COLOR_PAIR(1));
+      mvwprintw(menuIP, j + 1, 5, "AREA %03d", i + 1);
+      wattroff(menuIP, COLOR_PAIR(1));
+    }
+    else {
+      mvwprintw(menuIP, j + 1, 5, "AREA %03d", i + 1);
+    }
+    j += 2;
+  }
+}
+
+void setIndex(WINDOW* informationIP, int* maxY, int* index, bool* isLast)
+{
+  wattron(informationIP, COLOR_PAIR(1));
+  wattron(informationIP, A_BOLD);
+  if (*index == 0) {
+    mvwprintw(informationIP, *maxY - 3, 4, "*");
+    mvwprintw(informationIP, *maxY - 3, 14, "+");
+  } else if (isLast) {
+    mvwprintw(informationIP, *maxY - 3, 4, "-");
+    mvwprintw(informationIP, *maxY - 3, 14, "*");
+  } else {
+    mvwprintw(informationIP, *maxY - 3, 4, "-");
+    mvwprintw(informationIP, *maxY - 3, 14, "+");
+  }
+
+  mvwprintw(informationIP, *maxY - 3, 8, "%02d", *index);
+  wattroff(informationIP, A_BOLD);
+  wattroff(informationIP, COLOR_PAIR(1));
+}
+
+void showHints(WINDOW* informationIP, int* maxY)
+{
+  char* hintsList[] = {
+    " q: salir ",
+    " k: arriba ",
+    " j: abajo ",
+    " h: izquierda ",
+    " l: derecha "
+  };
+
+  int hintLenght = sizeof(hintsList) / sizeof(*hintsList); 
+  int sum = 2;
+
+  wattron(informationIP, COLOR_PAIR(1));
+  wattron(informationIP, A_BOLD);
+
+  for (int i = 0; i < hintLenght; i++) {
+    mvwprintw(informationIP, *maxY - 1, sum, "%s", hintsList[i]);
+    sum = strlen(hintsList[i]) + 2 + sum;
+  }
+
+  wattroff(informationIP, A_BOLD);
+  wattroff(informationIP, COLOR_PAIR(1));
+}
+
+
+void exitWindow(WINDOW* window)
+{
+  wborder(window, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+  werase(window);
+  wrefresh(window);
+  delwin(window);
 }
