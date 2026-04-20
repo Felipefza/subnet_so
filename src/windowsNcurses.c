@@ -170,8 +170,17 @@ void askUserInput (WINDOW* mainWindow, char* outString, const char* message)
   wrefresh(mainWindow);
 }
 
-void showError(WINDOW* mainWindow, const char* message)
+int showError(WINDOW* mainWindow, const char* message)
 {
+  int CONTINUE = 2;
+
+  int HINT_COLOR = 1;
+  int Y_HINT = LINES - 1;
+  int X_HINT = 2;
+
+  char* contStr = " c - continuar ";
+  char* exitErrorStr = " q - para salir ";
+
   curs_set(0);
 
   int lengthMessage = strlen(message);
@@ -184,20 +193,34 @@ void showError(WINDOW* mainWindow, const char* message)
 
   mvwprintw(messageWindow, 1, 2, "%s", message);
 
+
+  setColorMvwprint(mainWindow, &HINT_COLOR, &Y_HINT, &X_HINT, "%s", contStr);
+  X_HINT += strlen(contStr) + 2;
+  setColorMvwprint(mainWindow, &HINT_COLOR, &Y_HINT, &X_HINT, "%s", exitErrorStr);
+
   wrefresh(errorWindow);
   wrefresh(messageWindow);
+  wrefresh(mainWindow);
 
-  wgetch(errorWindow);
+  while (true) {
+    switch (wgetch(errorWindow)) {
+      case 'c':
+        return CONTINUE;
+        break;
+      case 'q':
+        exitWindow(errorWindow);
+        exitWindow(messageWindow);
 
-
-  exitWindow(errorWindow);
-  exitWindow(messageWindow);
-
-  endNcurses(mainWindow);
+        return EXIT_FAILURE;
+        break;
+    }
+  }
 }
 
-void getResults(WINDOW* mainWindow, Octetcs* pOctectUser, int* numberAreas, ResultIP* results)
+int getResults(WINDOW* mainWindow, Octetcs* pOctectUser, int* numberAreas, ResultIP* results)
 {
+  int EXIT = 0;
+
   char* messageFormated = calloc(40, sizeof(messageFormated));
 
   char* net = calloc(16, sizeof(*net));
@@ -229,7 +252,10 @@ void getResults(WINDOW* mainWindow, Octetcs* pOctectUser, int* numberAreas, Resu
 
     sprintf(messageFormated, "%s %d", "INGRESE LOS HOSTS DE AREA NUMERO", index + 1);
 
-    getHosts(mainWindow, numberHosts, messageFormated);
+    if (getHosts(mainWindow, numberHosts, messageFormated)) {
+      EXIT = 1;
+      continue;
+    }
 
     calcMasc(numberHosts, masc, mascPunteada);
 
@@ -259,6 +285,7 @@ void getResults(WINDOW* mainWindow, Octetcs* pOctectUser, int* numberAreas, Resu
 
     resetNet(mainWindow, net, &pOctectbroad, pOctectUser);
   }
+
   free(numberHosts);
   free(masc);
   free(mascPunteada);
@@ -268,6 +295,8 @@ void getResults(WINDOW* mainWindow, Octetcs* pOctectUser, int* numberAreas, Resu
 
   free(net);
   free(ipType);
+
+  return EXIT;
 }
 
 void showInformation(WINDOW* window, int* index, ResultIP* results, int* maxX, int* maxY)
@@ -303,15 +332,23 @@ int resetNet(WINDOW* mainWindow, char* net, Octetcs* pOctectbroad, Octetcs* pOct
 
 int getHosts(WINDOW* mainWindow, int* numberHosts, const char* message)
 {
+  bool isRunning = true;
+
   *numberHosts = 0;
 
   char* buffer = calloc(20, sizeof(buffer));
 
-  askUserInput(mainWindow, buffer, message);
+  while (isRunning) {
+    askUserInput(mainWindow, buffer, message);
 
-  if (!isValidNumber(buffer)) {
-    showError(mainWindow, "SOLO NUMEROS POSITIVOS");
-    return EXIT_FAILURE;
+    if (!isValidNumber(buffer)) {
+      if (showError(mainWindow, "SOLO NUMEROS POSITIVOS") != 2){
+      return EXIT_FAILURE;
+    }
+      printf(buffer, "%s", "");
+      continue;
+    }
+    isRunning = false;
   }
 
   *numberHosts = atoi(buffer);
